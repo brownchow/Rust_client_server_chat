@@ -40,7 +40,7 @@ fn main() {
                             // 读取成功：把缓冲区中有效部分（直到第一个 0）转成字符串
                             let msg_bytes: Vec<u8> = buff
                                 .into_iter()
-                                .take_while(|&x| x != 0)   // 遇到 0 就停止（因为后面是填充的 0）
+                                .take_while(|&byte| byte != 0)   // 遇到 0 就停止（因为后面是填充的 0）
                                 .collect();
                             let msg = String::from_utf8(msg_bytes)
                                 .expect("接收到非 UTF-8 消息！");
@@ -71,7 +71,11 @@ fn main() {
                     let mut buff = msg.clone().into_bytes(); // String -> Vec<u8>
                     buff.resize(MSG_SIZE, 0);                // 补齐到 32 字节，用 0 填充
                     // 尝试写入，如果成功就保留这个 client，否则过滤掉（说明已断开）
-                    client.write_all(&buff).map(|_| client).ok()
+                    if client.write_all(&buff).is_ok() {
+                        Some(client)                   // 成功就保留
+                    } else {
+                        None                           // 失败就过滤掉
+                    }
                 })
                 .collect::<Vec<_>>();   // 重新收集剩余存活的客户端
         }
