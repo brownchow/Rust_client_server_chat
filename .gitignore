@@ -1,0 +1,14 @@
+# Rust 编译输出目录
+client/target/
+server/target/
+
+# Cargo 锁文件（可选，根据团队规范决定是否忽略）
+# Cargo.lock
+
+# 编辑器临时文件
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
