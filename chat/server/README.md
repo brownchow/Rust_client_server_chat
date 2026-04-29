@@ -1,5 +1,9 @@
 # Rust 聊天室服务器代码解析
 
+## 服务器工作流程图
+
+![服务器流程图](./diagram.svg)
+
 ## 1. `let tx = tx.clone();` 为什么要克隆？
 
 因为 `mpsc::channel` 的发送端 `Sender` 是支持克隆的（多生产者）。

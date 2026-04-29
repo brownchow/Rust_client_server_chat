@@ -1,0 +1,79 @@
+<svg font-family="Arial, sans-serif" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" height="620" width="900">
+
+  
+  <text font-weight="bold" font-size="24" text-anchor="middle" y="35" x="450">Rust TCP 聊天服务器流程图</text>
+  <text fill="#666" font-size="14" text-anchor="middle" y="60" x="450">服务器接受客户端连接 → 创建线程 → 消息处理与客户端回收</text>
+
+  
+  <rect stroke-width="3" stroke="#333" fill="#f8f9fa" rx="15" height="500" width="800" y="90" x="50"></rect>
+
+  
+  <rect stroke-width="4" stroke="#1e88e5" fill="#ffffff" rx="10" height="460" width="740" y="110" x="80"></rect>
+  <text fill="#1e88e5" font-weight="bold" font-size="18" text-anchor="middle" y="135" x="450">主线程 Main Loop</text>
+
+  
+  <rect stroke-width="3" stroke="#1976d2" fill="#e3f2fd" rx="8" height="90" width="280" y="160" x="120"></rect>
+  <text font-weight="bold" font-size="15" text-anchor="middle" y="190" x="260">1. server.accept()</text>
+  <text fill="#555" font-size="13" text-anchor="middle" y="215" x="260">尝试接受新客户端连接</text>
+  <text fill="#555" font-size="13" text-anchor="middle" y="235" x="260">(非阻塞模式)</text>
+
+  
+  <text font-weight="bold" fill="#2e7d32" font-size="14" y="310" x="200">✓ Ok((mut socket, addr))</text>
+
+  
+  <rect stroke-width="3" stroke="#388e3c" fill="#e8f5e9" rx="10" height="160" width="340" y="330" x="100"></rect>
+  <text fill="#2e7d32" font-weight="bold" font-size="15" text-anchor="middle" y="355" x="270">为新客户端创建专用线程</text>
+  
+  <rect stroke-width="2.5" stroke="#66bb6a" fill="#ffffff" rx="8" height="110" width="280" y="370" x="130"></rect>
+  <text font-size="13" text-anchor="middle" y="390" x="270">• let tx = tx.clone();</text>
+  <text font-size="13" text-anchor="middle" y="410" x="270">• clients.push(socket.try_clone()...)</text>
+  <text font-weight="bold" font-size="13" text-anchor="middle" y="430" x="270">thread::spawn(move || { ... })</text>
+  <text fill="#555" font-size="12" text-anchor="middle" y="450" x="270">move 把 tx 和 socket 所有权移入子线程</text>
+
+  
+  <rect stroke-width="3" stroke="#f57c00" fill="#fff3e0" rx="12" height="280" width="320" y="160" x="520"></rect>
+  <text fill="#f57c00" font-weight="bold" font-size="16" text-anchor="middle" y="185" x="680">子线程（每个客户端一个）</text>
+
+  <rect stroke-width="2.5" stroke="#ff9800" fill="#ffffff" rx="8" height="220" width="260" y="205" x="550"></rect>
+  <text font-weight="bold" font-size="13" text-anchor="middle" y="230" x="680">循环读取客户端消息</text>
+  <text font-size="12" text-anchor="middle" y="255" x="680">socket.read_exact(&amp;mut buff)</text>
+
+  
+  <rect stroke="#7cb342" fill="#f1f8e9" rx="6" height="65" width="220" y="270" x="570"></rect>
+  <text fill="#33691e" font-size="12" text-anchor="middle" y="290" x="680">成功 → 处理消息</text>
+  <text fill="#33691e" font-size="12" text-anchor="middle" y="310" x="680">take_while(|&amp;x| x != 0) → tx.send(msg)</text>
+
+  
+  <rect stroke="#e53935" fill="#ffebee" rx="6" height="50" width="220" y="345" x="570"></rect>
+  <text fill="#b71c1c" font-size="12" text-anchor="middle" y="365" x="680">错误（非 WouldBlock）</text>
+  <text fill="#b71c1c" font-size="12" text-anchor="middle" y="385" x="680">→ break; 线程自然结束</text>
+
+  
+  <rect stroke-width="3" stroke="#00796b" fill="#e0f2f1" rx="10" height="80" width="660" y="510" x="120"></rect>
+  <text fill="#00695c" font-weight="bold" font-size="15" text-anchor="middle" y="535" x="450">主线程：rx.try_recv() → 广播消息</text>
+  <text fill="#004d40" font-size="13" text-anchor="middle" y="555" x="450">
+    clients = clients.into_iter().filter_map(...).collect()
+  </text>
+  <text fill="#004d40" font-size="12" text-anchor="middle" y="575" x="450">写入失败的客户端会被自动过滤掉（回收）</text>
+
+  
+  <line marker-end="url(#arrow)" stroke-width="3" stroke="#1976d2" y2="220" x2="520" y1="295" x1="260"></line>
+  <line marker-end="url(#arrow)" stroke-dasharray="4,4" stroke-width="3" stroke="#e53935" y2="505" x2="680" y1="400" x1="680"></line>
+  <line stroke-dasharray="6,4" stroke-width="2" stroke="#455a64" y2="110" x2="450" y1="590" x1="450"></line>
+
+  
+  <defs>
+    <marker orient="auto" refY="3" refX="8" markerHeight="10" markerWidth="10" id="arrow">
+      <path fill="#455a64" d="M0,0 L0,6 L9,3 z"></path>
+    </marker>
+  </defs>
+
+  
+  <rect stroke-width="2" stroke="#999" fill="#fafafa" rx="5" height="70" width="160" y="80" x="720"></rect>
+  <text font-weight="bold" font-size="12" y="100" x="730">图例</text>
+  <rect stroke="#1976d2" fill="#e3f2fd" height="18" width="18" y="110" x="730"></rect>
+  <text font-size="11" y="123" x="755">主线程</text>
+  <rect stroke="#f57c00" fill="#fff3e0" height="18" width="18" y="130" x="730"></rect>
+  <text font-size="11" y="143" x="755">子线程</text>
+
+</svg>
