@@ -1,0 +1,50 @@
+<svg font-family="Arial, sans-serif" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 620" height="620" width="920">
+
+  <text font-weight="bold" font-size="26" text-anchor="middle" y="35" x="460">Rust TCP 聊天客户端工作流程</text>
+  <text fill="#555" font-size="14" text-anchor="middle" y="60" x="460">双线程模型：主线程负责输入，子线程负责收发消息</text>
+
+  
+  <rect stroke-width="4" stroke="#1976d2" fill="#e3f2fd" rx="15" height="280" width="340" y="100" x="80"></rect>
+  <text fill="#1976d2" font-weight="bold" font-size="18" text-anchor="middle" y="130" x="250">主线程 (Main Thread)</text>
+  
+  <rect stroke="#64b5f6" fill="#ffffff" rx="10" height="180" width="260" y="160" x="120"></rect>
+  <text font-weight="bold" font-size="14" text-anchor="middle" y="190" x="250">用户输入循环</text>
+  <text font-size="13" y="220" x="250">io::stdin().read_line()</text>
+  <text font-size="13" y="245" x="250">读取用户输入消息</text>
+  <text font-size="13" y="275" x="250">if msg == ":quit" → 退出</text>
+  <text fill="#d32f2f" font-size="13" y="300" x="250">tx.send(msg) → 发送给子线程</text>
+
+  
+  <rect stroke-width="4" stroke="#f57c00" fill="#fff3e0" rx="15" height="420" width="360" y="100" x="500"></rect>
+  <text fill="#f57c00" font-weight="bold" font-size="18" text-anchor="middle" y="130" x="680">子线程 (Worker Thread)</text>
+
+  <rect stroke="#ffb74d" fill="#ffffff" rx="10" height="340" width="300" y="160" x="530"></rect>
+  
+  <text font-weight="bold" font-size="15" text-anchor="middle" y="185" x="680">循环执行以下两件事</text>
+
+  
+  <rect stroke="#66bb6a" fill="#e8f5e9" rx="8" height="110" width="260" y="205" x="550"></rect>
+  <text fill="#2e7d32" font-weight="bold" font-size="14" text-anchor="middle" y="230" x="680">1. 接收服务器消息</text>
+  <text font-size="13" y="255" x="680">client.read_exact(&amp;mut buff)</text>
+  <text font-size="13" y="280" x="680">take_while(|&amp;byte| byte != 0)</text>
+  <text font-size="13" y="300" x="680">打印接收到的消息</text>
+
+  
+  <rect stroke="#29b6f6" fill="#e1f5fe" rx="8" height="120" width="260" y="330" x="550"></rect>
+  <text fill="#0277bd" font-weight="bold" font-size="14" text-anchor="middle" y="355" x="680">2. 发送用户消息</text>
+  <text font-size="13" y="380" x="680">rx.try_recv() 获取主线程消息</text>
+  <text font-size="13" y="400" x="680">转为固定长度缓冲区</text>
+  <text font-size="13" y="420" x="680">client.write_all(&amp;buff)</text>
+
+  
+  <line marker-end="url(#arrow)" stroke-width="3" stroke="#1976d2" y2="280" x2="500" y1="280" x1="420"></line>
+  <text fill="#1976d2" font-size="12" y="265" x="460">tx.send(msg)</text>
+
+  
+  <defs>
+    <marker orient="auto" refY="3" refX="8" markerHeight="10" markerWidth="10" id="arrow">
+      <path fill="#1976d2" d="M0,0 L0,6 L9,3 z"></path>
+    </marker>
+  </defs>
+
+</svg>
